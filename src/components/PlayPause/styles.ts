@@ -18,6 +18,8 @@ export const styles = StyleSheet.create({
   },
   play: {},
   rewind: {
-    tintColor: 'white'
+    tintColor: 'white',
+    height: 32, 
+    width: 32,
   },
 });
