@@ -97,6 +97,8 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
   const [seeking, setSeeking] = useState(false);
   const [loading, setLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
+  const [twoTimesRewind, setTwoTimesRewind] = useState(false);
+  const [twoTimesForward, setTwoTimesForward] = useState(false);
   const [error, setError] = useState(false);
   const [duration, setDuration] = useState(0);
 
@@ -294,8 +296,9 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
 
   const handleRewindPress = () => {
     const x: NodeJS.Timeout = setTimeout(() => {
-      if (rewindPressCount === 4) {
+      if (rewindPressCount === 3) {
         setRewindPressCount(0);
+        setTwoTimesRewind(false);
       } else {
         let newCount = rewindPressCount + 1;
         setRewindPressCount(newCount);
@@ -313,8 +316,9 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
   // I only have this working for fast forward right now
   const handleFastForwardPress = () => {
     const x: NodeJS.Timeout = setTimeout(() => {
-      if (pressCount === 4) {
+      if (pressCount === 3) {
         setPressCount(0);
+        setTwoTimesForward(false);
       } else {
         let newCount = pressCount + 1;
         setPressCount(newCount);
@@ -335,6 +339,7 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
     if (currentTime <= duration && rewindPressCount === 1) {
       videoRef?.current?.seek(currentTime - rewindTime);
     } else if (currentTime <= duration && rewindPressCount > 1) {
+      setTwoTimesRewind(true);
       videoRef?.current?.seek(currentTime - skipTime);
     } else {
       setPaused(false);
@@ -347,6 +352,7 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
     if (currentTime <= duration && pressCount === 1) {
       videoRef?.current?.seek(currentTime + rewindTime);
     } else if (currentTime <= duration && pressCount > 1) {
+      setTwoTimesForward(true);
       videoRef?.current?.seek(currentTime + skipTime);
     } else {
       setPaused(false);
@@ -507,6 +513,8 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
               onPressSkipForward={() =>
                 videoRef?.current?.seek(currentTime + rewindTime)
               }
+              twoTimesRewind={twoTimesRewind}
+              twoTimesForward={twoTimesForward}
             />
             <BottomControls
               animations={animations}

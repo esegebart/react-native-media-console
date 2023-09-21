@@ -1,5 +1,12 @@
 import React, {createRef} from 'react';
-import {Animated, Image, Platform, TouchableHighlight} from 'react-native';
+import {
+  Animated,
+  Image,
+  Platform,
+  TouchableHighlight,
+  Text,
+  View,
+} from 'react-native';
 import {Control} from '../Control';
 import {NullControl} from '../NullControl';
 import type {VideoAnimations} from '../../types';
@@ -19,6 +26,8 @@ interface PlayPauseProps {
   onPressRewind: () => void;
   onPressSkipForward: () => void;
   onPressSkipBackward: () => void;
+  twoTimesRewind: boolean;
+  twoTimesForward: boolean;
 }
 
 const play = require('../../assets/img/play.png');
@@ -39,7 +48,9 @@ export const PlayPause = ({
   onPressForward,
   onPressRewind,
   onPressSkipForward,
-  onPressSkipBackward, 
+  onPressSkipBackward,
+  twoTimesRewind,
+  twoTimesForward,
 }: PlayPauseProps) => {
   let source = paused ? play : pause;
 
@@ -56,20 +67,38 @@ export const PlayPause = ({
     <Animated.View
       pointerEvents={'box-none'}
       style={[styles.container, animatedStyles]}>
-      {!disableSeekButtons ? (
+      {!disableSeekButtons && twoTimesRewind ? (
+        <View style={{flexDirection: 'row'}}>
+          <Text style={{fontSize: 20, color: 'white', paddingTop: 15}}>2x</Text>
+          <Control
+            disabled={!showControls}
+            callback={onPressRewind}
+            resetControlTimeout={resetControlTimeout}>
+            <Image
+              source={rewind}
+              resizeMode={'contain'}
+              style={styles.rewind}
+            />
+          </Control>
+        </View>
+      ) : (
         <Control
           disabled={!showControls}
           callback={onPressRewind}
           resetControlTimeout={resetControlTimeout}>
           <Image source={rewind} resizeMode={'contain'} style={styles.rewind} />
         </Control>
-      ) : null}
+      )}
       {!disableSeekButtons ? (
         <Control
           disabled={!showControls}
           callback={onPressSkipBackward}
           resetControlTimeout={resetControlTimeout}>
-          <Image source={skipBackward} resizeMode={'contain'} style={styles.rewind} />
+          <Image
+            source={skipBackward}
+            resizeMode={'contain'}
+            style={styles.rewind}
+          />
         </Control>
       ) : null}
       <Control
@@ -86,10 +115,28 @@ export const PlayPause = ({
           disabled={!showControls}
           callback={onPressSkipForward}
           resetControlTimeout={resetControlTimeout}>
-          <Image source={skipForward} resizeMode={'contain'} style={styles.rewind} />
+          <Image
+            source={skipForward}
+            resizeMode={'contain'}
+            style={styles.rewind}
+          />
         </Control>
       ) : null}
-      {!disableSeekButtons ? (
+      {!disableSeekButtons && twoTimesForward ? (
+        <View style={{flexDirection: 'row'}}>
+          <Control
+            disabled={!showControls}
+            callback={onPressForward}
+            resetControlTimeout={resetControlTimeout}>
+            <Image
+              source={forward}
+              resizeMode={'contain'}
+              style={{backgroundColor: 'transparent'}}
+            />
+          </Control>
+          <Text style={{fontSize: 20, color: 'white', paddingTop: 15}}>2x</Text>
+        </View>
+      ) : (
         <Control
           disabled={!showControls}
           callback={onPressForward}
@@ -100,7 +147,7 @@ export const PlayPause = ({
             style={{backgroundColor: 'transparent'}}
           />
         </Control>
-      ) : null}
+      )}
     </Animated.View>
   );
 };
