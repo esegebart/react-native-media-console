@@ -17,6 +17,10 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   play: {},
+  seek: {
+    height: 29, 
+    width: 29,
+  },
   rewind: {
     tintColor: 'white',
     height: 32, 

@@ -62,7 +62,7 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
     disableVolume = false,
     disableFullscreen = false,
     disableTimer = false,
-    disableSeekbar = false,
+    disableSeekBar = false,
     disablePlayPause = false,
     disableSeekButtons = false,
     navigator,
@@ -339,7 +339,7 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
         typeof events.onPlay === 'function' && events.onPlay();
       }
     }
-  }, [rewindPressCount, currentTime]);
+  }, [rewindPressCount, currentTime, duration, videoRef]);
 
   useEffect(() => {
     //console.log('press count: ', pressCount);
@@ -361,7 +361,7 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
         typeof events.onPause === 'function' && events.onPause();
       }
     }
-  }, [pressCount, currentTime]);
+  }, [pressCount, currentTime, duration, videoRef]);
 
   useEffect(() => {
     if (currentTime === duration) {
@@ -433,6 +433,10 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showControls, loading]);
+
+  useEffect(() => {
+    setMuted(muted);
+  }, [muted]);
 
   useEffect(() => {
     const newVolume = volumePosition / volumeWidth;
@@ -524,7 +528,7 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
               animations={animations}
               panHandlers={seekPanResponder.panHandlers}
               disableTimer={disableTimer}
-              disableSeekbar={disableSeekbar}
+              disableSeekBar={disableSeekBar}
               showHours={showHours}
               showDuration={showDuration}
               paused={_paused}
