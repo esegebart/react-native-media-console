@@ -22,4 +22,9 @@ export const styles = StyleSheet.create({
     height: 32, 
     width: 32,
   },
+  rewindArrows: {
+    tintColor: 'white',
+    height: 50, 
+    width: 50,
+  },
 });

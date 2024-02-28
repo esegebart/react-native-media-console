@@ -97,8 +97,6 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
   const [seeking, setSeeking] = useState(false);
   const [loading, setLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
-  const [twoTimesRewind, setTwoTimesRewind] = useState(false);
-  const [twoTimesForward, setTwoTimesForward] = useState(false);
   const [error, setError] = useState(false);
   const [duration, setDuration] = useState(0);
 
@@ -296,13 +294,7 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
 
   const handleRewindPress = () => {
     const x: NodeJS.Timeout = setTimeout(() => {
-      if (rewindPressCount === 3) {
-        setRewindPressCount(0);
-        setTwoTimesRewind(false);
-      } else {
-        let newCount = rewindPressCount + 1;
-        setRewindPressCount(newCount);
-      }
+      setRewindPressCount(rewindPressCount + 1);
     }, 500);
 
     setTimeoutId(x);
@@ -316,13 +308,7 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
   // I only have this working for fast forward right now
   const handleFastForwardPress = () => {
     const x: NodeJS.Timeout = setTimeout(() => {
-      if (pressCount === 3) {
-        setPressCount(0);
-        setTwoTimesForward(false);
-      } else {
-        let newCount = pressCount + 1;
-        setPressCount(newCount);
-      }
+      setPressCount(pressCount + 1);
     }, 500);
 
     setTimeoutId(x);
@@ -334,34 +320,53 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
   };
 
   useEffect(() => {
-    let skipTime = duration * 0.0012 * rewindPressCount;
+    //console.log('rewind press count: ', rewindPressCount);
+    let skipTime = duration * 0.003;
 
-    if (currentTime <= duration && rewindPressCount === 1) {
-      videoRef?.current?.seek(currentTime - rewindTime);
-    } else if (currentTime <= duration && rewindPressCount > 1) {
-      setTwoTimesRewind(true);
+    if (currentTime < duration && rewindPressCount == 1) {
+      if (!_paused) {
+        console.log('are we making it? 2');
+        setPaused(true);
+      }
       videoRef?.current?.seek(currentTime - skipTime);
-    } else {
-      setPaused(false);
+    } else if (rewindPressCount > 1 || currentTime == duration) {
+      setRewindPressCount(0);
+      
+      if (currentTime == duration) {
+        typeof events.onPause === 'function' && events.onPause();
+      } else {
+        console.log('are we in the events play rewind');
+        typeof events.onPlay === 'function' && events.onPlay();
+      }
     }
   }, [rewindPressCount, currentTime]);
 
   useEffect(() => {
-    let skipTime = duration * 0.0012 * pressCount;
+    //console.log('press count: ', pressCount);
+    let skipTime = duration * 0.003;
 
-    if (currentTime <= duration && pressCount === 1) {
-      videoRef?.current?.seek(currentTime + rewindTime);
-    } else if (currentTime <= duration && pressCount > 1) {
-      setTwoTimesForward(true);
+    if (currentTime < duration && pressCount == 1) {
+      if (!_paused) {
+        console.log('are we making it?');
+        setPaused(true);
+      }
       videoRef?.current?.seek(currentTime + skipTime);
-    } else {
-      setPaused(false);
+    } else if (pressCount > 1 || currentTime == duration) {
+      setPressCount(0);
+
+      if (currentTime == duration) {
+        typeof events.onPause === 'function' && events.onPause();
+      } else {
+        console.log('are we in the events play fast forward');
+        typeof events.onPause === 'function' && events.onPause();
+      }
     }
   }, [pressCount, currentTime]);
 
   useEffect(() => {
-    if (currentTime >= duration) {
+    if (currentTime === duration) {
       videoRef?.current?.seek(0);
+      setPaused(true);
     }
   }, [currentTime, duration, videoRef]);
 
@@ -393,13 +398,14 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
   }, [paused]);
 
   useEffect(() => {
+    console.log('_paused ---- are we changing?', _paused);
     if (_paused) {
-      setPressCount(0);
-      setRewindPressCount(0);
+      console.log('hi we are paused');
       typeof events.onPause === 'function' && events.onPause();
     } else {
       setPressCount(0);
       setRewindPressCount(0);
+      console.log('Hi we are in the paused useefffect, ');
       typeof events.onPlay === 'function' && events.onPlay();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -513,8 +519,6 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
               onPressSkipForward={() =>
                 videoRef?.current?.seek(currentTime + rewindTime)
               }
-              twoTimesRewind={twoTimesRewind}
-              twoTimesForward={twoTimesForward}
             />
             <BottomControls
               animations={animations}
