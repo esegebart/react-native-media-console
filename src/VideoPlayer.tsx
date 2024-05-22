@@ -65,6 +65,7 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
     disableSeekBar = false,
     disablePlayPause = false,
     disableSeekButtons = false,
+    disableOverlay = false,
     navigator,
     rewindTime = 15,
     pan: {horizontal: horizontalPan, inverted: invertedPan} = {},
@@ -97,6 +98,7 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
   const [seeking, setSeeking] = useState(false);
   const [loading, setLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
+  const [status, setStatus] = useState(props.status);
   const [error, setError] = useState(false);
   const [duration, setDuration] = useState(0);
 
@@ -159,6 +161,7 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
   }
 
   function _onLoad(data: OnLoadData) {
+    console.log('data: ', data);
     setDuration(data.duration);
     setLoading(false);
 
@@ -174,7 +177,6 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
   function _onProgress(data: OnProgressData) {
     if (!seeking) {
       setCurrentTime(data.currentTime);
-
       if (typeof onProgress === 'function') {
         onProgress(data);
       }
@@ -320,12 +322,10 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
   };
 
   useEffect(() => {
-    //console.log('rewind press count: ', rewindPressCount);
-    let skipTime = duration * 0.003;
+    let skipTime = duration * 0.0012;
 
     if (currentTime < duration && rewindPressCount == 1) {
       if (!_paused) {
-        console.log('are we making it? 2');
         setPaused(true);
       }
       videoRef?.current?.seek(currentTime - skipTime);
@@ -335,19 +335,16 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
       if (currentTime == duration) {
         typeof events.onPause === 'function' && events.onPause();
       } else {
-        console.log('are we in the events play rewind');
         typeof events.onPlay === 'function' && events.onPlay();
       }
     }
   }, [rewindPressCount, currentTime, duration, videoRef]);
 
   useEffect(() => {
-    //console.log('press count: ', pressCount);
-    let skipTime = duration * 0.003;
+    let skipTime = duration * 0.0012;
 
     if (currentTime < duration && pressCount == 1) {
       if (!_paused) {
-        console.log('are we making it?');
         setPaused(true);
       }
       videoRef?.current?.seek(currentTime + skipTime);
@@ -357,7 +354,6 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
       if (currentTime == duration) {
         typeof events.onPause === 'function' && events.onPause();
       } else {
-        console.log('are we in the events play fast forward');
         typeof events.onPause === 'function' && events.onPause();
       }
     }
@@ -494,8 +490,8 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
         ) : (
           <>
             <Error error={error} />
-            <Overlay animations={animations} />
-            <TopControls
+            {!disableOverlay && <Overlay animations={animations} />}
+            {!disableOverlay && <TopControls
               panHandlers={volumePanResponder.panHandlers}
               animations={animations}
               disableBack={disableBack}
@@ -506,7 +502,7 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
               onBack={events.onBack}
               resetControlTimeout={resetControlTimeout}
               showControls={showControls}
-            />
+            />}
             <PlayPause
               animations={animations}
               disablePlayPause={disablePlayPause}
@@ -524,7 +520,7 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
                 videoRef?.current?.seek(currentTime + rewindTime)
               }
             />
-            <BottomControls
+            {!disableOverlay && <BottomControls
               animations={animations}
               panHandlers={seekPanResponder.panHandlers}
               disableTimer={disableTimer}
@@ -534,6 +530,7 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
               paused={_paused}
               showTimeRemaining={_showTimeRemaining}
               currentTime={currentTime}
+              status={status}
               duration={duration}
               seekColor={seekColor}
               title={title}
@@ -546,7 +543,7 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
               disableFullscreen={disableFullscreen}
               toggleFullscreen={toggleFullscreen}
               showControls={showControls}
-            />
+            />}
           </>
         )}
       </View>

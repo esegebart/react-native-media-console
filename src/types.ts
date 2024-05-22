@@ -206,6 +206,14 @@ export interface VideoPlayerProps extends VideoProperties {
   disableSeekButtons?: boolean;
 
   /**
+   * Hide the transparent overlay which is active when the controls are shown. 
+   * Generally used when you want to disable all the controls.
+   *
+   * @default false
+   */
+  disableOverlay?: boolean;
+
+  /**
    * When using the default React Native navigator and do not override the `onBack` function,
    * you'll need to pass the navigator to the VideoPlayer for it to function
    *
